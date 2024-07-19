@@ -906,7 +906,7 @@ end
 
 local function queryDeckForceOfWind(slug, onSuccess, onError)
     if not slug or string.len(slug) == 0 then
-        onError("Invalid fow deck slug: " .. slug)
+        onError("Invalid fow deck slug: " .. dump(slug))
         return
     end
 
@@ -985,14 +985,18 @@ function importDeck()
 
     local deckID, queryDeckFunc
     if deckSource == DECK_SOURCE_URL then
-        if string.len(deckURL) == 0 then
-            printInfo("Please enter a deck URL.")
-            return 1
-        end
+      if string.len(deckURL) == 0 then
+          printInfo("Please enter a deck URL.")
+          return 1
+      end
 
+      if string.match(deckURL, FORCEOFWIND_URL_MATCH) then
         queryDeckFunc = queryDeckForceOfWind
         deckID = parseDeckIDForceOfWind(deckURL)
-
+      else
+        printInfo("Unknown deck site, sorry! Please input a valid force of wind decklist!")
+        return 1
+      end
     else
         log("Error. Unknown deck source: " .. deckSource or "nil")
         return 1
@@ -1030,7 +1034,7 @@ local function drawUI()
 
     if _inputs ~= nil then
         for i, input in pairs(self.getInputs()) do
-            if input.label == "Enter deck URL, or load from Notebook." then
+            if input.label == "Enter deck URL." then
                 deckURL = input.value
             end
         end
@@ -1040,7 +1044,7 @@ local function drawUI()
     self.createInput({
         input_function = "onLoadDeckInput",
         function_owner = self,
-        label          = "Enter deck URL, or load from Notebook.",
+        label          = "Enter deck URL.",
         alignment      = 2,
         position       = {x=0, y=0.1, z=0.78},
         width          = 2000,
@@ -1063,45 +1067,11 @@ local function drawUI()
         font_color     = {r=1, b=1, g=1},
         tooltip        = "Click to load deck from URL",
     })
-
-    self.createButton({
-        click_function = "onLoadDeckNotebookButton",
-        function_owner = self,
-        label          = "Load Deck (Notebook)",
-        position       = {1, 0.1, 1.15},
-        rotation       = {0, 0, 0},
-        width          = 850,
-        height         = 160,
-        font_size      = 80,
-        color          = {0.5, 0.5, 0.5},
-        font_color     = {r=1, b=1, g=1},
-        tooltip        = "Click to load deck from notebook",
-    })
-
-    self.createButton({
-        click_function = "onToggleAdvancedButton",
-        function_owner = self,
-        label          = "...",
-        position       = {2.25, 0.1, 1.15},
-        rotation       = {0, 0, 0},
-        width          = 160,
-        height         = 160,
-        font_size      = 100,
-        color          = {0.5, 0.5, 0.5},
-        font_color     = {r=1, b=1, g=1},
-        tooltip        = "Click to open advanced menu",
-    })
-
-    if advanced then
-        self.UI.show("MTGDeckLoaderAdvancedPanel")
-    else
-        self.UI.hide("MTGDeckLoaderAdvancedPanel")
-    end
 end
 
 function getDeckInputValue()
     for i, input in pairs(self.getInputs()) do
-        if input.label == "Enter deck URL, or load from Notebook." then
+        if input.label == "Enter deck URL" then
             return trim(input.value)
         end
     end
@@ -1121,23 +1091,6 @@ function onLoadDeckURLButton(_, pc, _)
     deckSource = DECK_SOURCE_URL
 
     startLuaCoroutine(self, "importDeck")
-end
-
-function onLoadDeckNotebookButton(_, pc, _)
-    if lock then
-        printToColor("Another deck is currently being imported. Please wait for that to finish.", pc)
-        return
-    end
-
-    playerColor = pc
-    deckSource = DECK_SOURCE_NOTEBOOK
-
-    startLuaCoroutine(self, "importDeck")
-end
-
-function onToggleAdvancedButton(_, _, _)
-    advanced = not advanced
-    drawUI()
 end
 
 function getCardBack()
@@ -1188,19 +1141,11 @@ end
 
 ------ TTS CALLBACKS
 function onLoad()
-    self.setName("MTG Deck Loader")
+    self.setName("FoW Deck Loader")
 
     self.setDescription(
     [[
-Enter your deck URL from many online deck builders!
-
-You can also paste a decklist in MTG Arena format into your color's notebook.
-
-Currently supported sites:
- - tappedout.net
- - archidekt.com
- - moxfield.com
- - deckstats.net
+Enter your deck URL from force of wind!
 ]])
 
     drawUI()
