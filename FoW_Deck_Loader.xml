@@ -1,0 +1,6 @@
+<Defaults>
+    <Text alignment="middleLeft" color="White" minWidth="10"/>
+    <InputField alignment="middleLeft"/>
+    <Toggle alignment="middleLeft" textColor="White"/>
+    <Panel alignment="middleLeft"/>
+</Defaults>
