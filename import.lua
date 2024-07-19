@@ -561,7 +561,7 @@ X_START_POS = 0.0;
 Z_POS = 0.2;
 Y_POS = -0.8286;
 
-DEFAULT_CARDBACK = "https://gamepedia.cursecdn.com/mtgsalvation_gamepedia/f/f8/Magic_card_back.jpg?version=0ddc8d41c3b69c2c3c4bb5d72669ffd7"
+DEFAULT_CARDBACK = "https://i.imgur.com/QRiof4H.jpeg"
 DEFAULT_LANGUAGE = "en"
 
 LANGUAGES = {
@@ -861,7 +861,8 @@ local function loadDeck(cards, deckName, onComplete, onError)
     local function decSem() sem = sem - 1 end
 
     for index, zoneDeck in ipairs(zoneDecks) do
-        spawnDeck(zoneDeck, indexZone[index], self.positionToWorld(getPositionForZone(index)), true,
+        notRuler = string.match(indexZone[index], "ruler") == nil and string.match(indexZone[index], "Ruler") == nil
+        spawnDeck(zoneDeck, indexZone[index], self.positionToWorld(getPositionForZone(index)), notRuler,
         function() -- onSuccess
             decSem()
         end,
