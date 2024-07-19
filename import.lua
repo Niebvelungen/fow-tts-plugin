@@ -542,16 +542,19 @@ end
 
 
 ------ CONSTANTS
+
 if(DEBUG) then
   FORCEOFWIND_BASE = "http://localhost:1337"
   FORCEOFWIND_DECK_API_BASE = "http://localhost:1337/api/deck/"
   FORCEOFWIND_URL_MATCH = "localhost:1337"
   FORCEOFWIND_URL_ID_MATCH = "localhost:1337/view_decklist/(%d*)/"
+  FORCEOFWIND_BASE_IMG_URL = "https://fowsim.s3.amazonaws.com"
 else
   FORCEOFWIND_BASE = "https://forceofwind.online"
   FORCEOFWIND_DECK_API_BASE = "https://forceofwind.online/api/deck/"
   FORCEOFWIND_URL_MATCH = "forceofwind%.online"
   FORCEOFWIND_URL_ID_MATCH = "forceofwind%.online/view_decklist/(%d*)/"
+  FORCEOFWIND_BASE_IMG_URL = ""
 end
 
 FORCEOFWIND_URL_SUFFIX = "/"
@@ -954,13 +957,13 @@ local function queryDeckForceOfWind(slug, onSuccess, onError)
                 faces = {}
                 faces[1] = 
                 {
-                    imageURI = FORCEOFWIND_BASE .. cardData.img,
+                    imageURI = FORCEOFWIND_BASE_IMG_URL .. cardData.img,
                     name = cardData.name,
                     oracleText = cardData.oracle_text
                 }
 
                 for _, face in pairs(cardData.otherFaces or {}) do
-                  table.insert(faces, {imageURI = FORCEOFWIND_BASE .. face.img, name = face.name, oracleText = ""})
+                  table.insert(faces, {imageURI = FORCEOFWIND_BASE_IMG_URL .. face.img, name = face.name, oracleText = ""})
                 end
 
                 table.insert(cards, {
