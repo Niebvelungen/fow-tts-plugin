@@ -548,7 +548,7 @@ if(DEBUG) then
   FORCEOFWIND_DECK_API_BASE = "http://localhost:1337/api/deck/"
   FORCEOFWIND_URL_MATCH = "localhost:1337"
   FORCEOFWIND_URL_ID_MATCH = "localhost:1337/view_decklist/(%d*)/"
-  FORCEOFWIND_BASE_IMG_URL = "https://fowsim.s3.amazonaws.com"
+  FORCEOFWIND_BASE_IMG_URL = FORCEOFWIND_BASE
 else
   FORCEOFWIND_BASE = "https://forceofwind.online"
   FORCEOFWIND_DECK_API_BASE = "https://forceofwind.online/api/deck/"
@@ -558,11 +558,6 @@ else
 end
 
 FORCEOFWIND_URL_SUFFIX = "/"
-
-Y_INCREASE = 0.1286;
-X_START_POS = 0.0;
-Z_POS = 0.2;
-Y_POS = -0.8286;
 
 DEFAULT_CARDBACK = "https://i.imgur.com/QRiof4H.jpeg"
 DEFAULT_LANGUAGE = "en"
@@ -823,15 +818,19 @@ local function spawnDeck(cards, name, position, flipped, onFullySpawned, onError
     )
 end
 
-local function getPositionForZone(i, yPos)
-    return {X_START_POS, Z_POS, yPos}
+local function getPositionForZone(x, y, z)
+    return {x, y, z}
 end
 
 -- Queries for the given card IDs, collates deck, and spawns objects.
 local function loadDeck(cards, deckName, onComplete, onError)
-    
+    local xDecrease = -0.7286
+    local xPos = 1.47
+    local yPos = 0.2
+    local zPos = 0.0
+
     local positions = {}
-    local lastY = Y_POS
+    local lastX = xPos
     local zoneDecks = {}
     local zoneIndex = {}
     local indexZone = {}
@@ -849,10 +848,10 @@ local function loadDeck(cards, deckName, onComplete, onError)
         local currZoneIndex = zoneIndex[card.zone]
 
         if positions[currZoneIndex] == nil then
-            positions[currZoneIndex] = getPositionForZone(i, lastY)
-            lastY = lastY + Y_INCREASE
+            positions[currZoneIndex] = getPositionForZone(lastX, yPos, zPos)
+            lastX = lastX + xDecrease
         end
-        
+
         if zoneDecks[currZoneIndex] == nil then
             zoneDecks[currZoneIndex] = {}
         end
@@ -867,7 +866,7 @@ local function loadDeck(cards, deckName, onComplete, onError)
 
     for index, zoneDeck in ipairs(zoneDecks) do
         notRuler = string.match(indexZone[index], "ruler") == nil and string.match(indexZone[index], "Ruler") == nil
-        spawnDeck(zoneDeck, indexZone[index], self.positionToWorld(getPositionForZone(index)), notRuler,
+        spawnDeck(zoneDeck, indexZone[index], self.positionToWorld(positions[index]), notRuler,
         function() -- onSuccess
             decSem()
         end,
@@ -955,7 +954,7 @@ local function queryDeckForceOfWind(slug, onSuccess, onError)
         for name, cardData in pairs(data.cards or {}) do
             if cardData then
                 faces = {}
-                faces[1] = 
+                faces[1] =
                 {
                     imageURI = FORCEOFWIND_BASE_IMG_URL .. cardData.img,
                     name = cardData.name,
@@ -988,6 +987,8 @@ function importDeck()
     end
 
     local deckURL = getDeckInputValue()
+
+    printInfo(deckURL)
 
     local deckID, queryDeckFunc
     if deckSource == DECK_SOURCE_URL then
@@ -1040,7 +1041,7 @@ local function drawUI()
 
     if _inputs ~= nil then
         for i, input in pairs(self.getInputs()) do
-            if input.label == "Enter deck URL." then
+            if input.label == "DeckURL" then
                 deckURL = input.value
             end
         end
@@ -1050,7 +1051,7 @@ local function drawUI()
     self.createInput({
         input_function = "onLoadDeckInput",
         function_owner = self,
-        label          = "Enter deck URL.",
+        label          = "DeckURL",
         alignment      = 2,
         position       = {x=0, y=0.1, z=0.78},
         width          = 2000,
@@ -1077,7 +1078,7 @@ end
 
 function getDeckInputValue()
     for i, input in pairs(self.getInputs()) do
-        if input.label == "Enter deck URL" then
+        if input.label == "DeckURL" then
             return trim(input.value)
         end
     end
