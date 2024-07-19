@@ -834,6 +834,8 @@ local function loadDeck(cards, deckName, onComplete, onError)
     local indexZone = {}
     local i = 1
 
+    printInfo("Preparing Deck... :")
+
     for _, card in ipairs(cards) do
         if zoneIndex[card.zone] == nil then
             zoneIndex[card.zone] = i
@@ -934,13 +936,13 @@ local function queryDeckForceOfWind(slug, onSuccess, onError)
         local success, data = pcall(function() return jsondecode(webReturn.text) end)
 
         if not success then
-            onError("Failed to parse JSON response from moxfield.")
+            onError("Failed to parse JSON response from force of wind.")
             return
         elseif not data then
-            onError("Empty response from moxfield.")
+            onError("Empty response from force of wind.")
             return
         elseif not data.name then
-            onError("Empty response from moxfield. Did you enter a valid deck URL?")
+            onError("Empty response from force of wind. Did you enter a valid deck URL?")
             return
         end
 
