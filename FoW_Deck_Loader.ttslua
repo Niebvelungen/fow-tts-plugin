@@ -28,7 +28,7 @@
 -- SOFTWARE.
 --
 
-local DEBUG = true
+local DEBUG = false
 
 local json = { _version = "0.1.2" }
 
@@ -566,6 +566,8 @@ LANGUAGES = {
     ["en"] = "en",
 }
 
+UI_LABEL_SEARCH_FIELD = 'Decklist Url from Force of Wind.....'
+
 ------ UI IDs
 UI_ADVANCED_PANEL = "MTGDeckLoaderAdvancedPanel"
 UI_CARD_BACK_INPUT = "MTGDeckLoaderCardBackInput"
@@ -799,7 +801,7 @@ local function spawnDeck(cards, name, position, flipped, onFullySpawned, onError
             local deckObject
 
             if cardObjects[1] and cardObjects[2] then
-                deckObject = cardObjects[1].putObject(cardObjects[2])
+                -- deckObject = cardObjects[1].putObject(cardObjects[2])
                 if success and deckObject then
                     deckObject.setPosition(position)
                     deckObject.setName(name)
@@ -809,7 +811,6 @@ local function spawnDeck(cards, name, position, flipped, onFullySpawned, onError
             else
                 deckObject = cardObjects[1]
             end
-
             onFullySpawned(deckObject)
         end,
         function() return (sem == 0) end,
@@ -867,14 +868,14 @@ local function loadDeck(cards, deckName, onComplete, onError)
     for index, zoneDeck in ipairs(zoneDecks) do
         notRuler = string.match(indexZone[index], "ruler") == nil and string.match(indexZone[index], "Ruler") == nil
         spawnDeck(zoneDeck, indexZone[index], self.positionToWorld(positions[index]), notRuler,
-        function() -- onSuccess
-            decSem()
-        end,
-        function(e) -- onError
-            printErr(e)
-            decSem()
-        end
-    )
+          function() -- onSuccess
+              decSem()
+          end,
+          function(e) -- onError
+              printErr(e)
+              decSem()
+          end
+        )
     end
     Wait.condition(
             function() onComplete() end,
@@ -1041,7 +1042,7 @@ local function drawUI()
 
     if _inputs ~= nil then
         for i, input in pairs(self.getInputs()) do
-            if input.label == "DeckURL" then
+            if input.label == UI_LABEL_SEARCH_FIELD then
                 deckURL = input.value
             end
         end
@@ -1051,7 +1052,7 @@ local function drawUI()
     self.createInput({
         input_function = "onLoadDeckInput",
         function_owner = self,
-        label          = "DeckURL",
+        label          = UI_LABEL_SEARCH_FIELD,
         alignment      = 2,
         position       = {x=0, y=0.1, z=0.78},
         width          = 2000,
@@ -1078,7 +1079,7 @@ end
 
 function getDeckInputValue()
     for i, input in pairs(self.getInputs()) do
-        if input.label == "DeckURL" then
+        if input.label == UI_LABEL_SEARCH_FIELD then
             return trim(input.value)
         end
     end
