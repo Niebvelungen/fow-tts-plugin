@@ -805,6 +805,7 @@ local function spawnDeck(cards, name, position, flipped, onFullySpawned, onError
                 if success and deckObject then
                     deckObject.setPosition(position)
                     deckObject.setName(name)
+                    deckObject.setDescription(name)
                 else
                     deckObject = cardObjects[1]
                 end
@@ -959,11 +960,11 @@ local function queryDeckForceOfWind(slug, onSuccess, onError)
                 {
                     imageURI = FORCEOFWIND_BASE_IMG_URL .. cardData.img,
                     name = cardData.name,
-                    oracleText = cardData.oracle_text
+                    oracleText = cardData.oracleText
                 }
 
                 for _, face in pairs(cardData.otherFaces or {}) do
-                  table.insert(faces, {imageURI = FORCEOFWIND_BASE_IMG_URL .. face.img, name = face.name, oracleText = ""})
+                  table.insert(faces, {imageURI = FORCEOFWIND_BASE_IMG_URL .. face.img, name = face.name, oracleText = face.oracleText})
                 end
 
                 table.insert(cards, {
