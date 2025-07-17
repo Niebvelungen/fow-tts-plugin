@@ -547,13 +547,13 @@ if(DEBUG) then
   FORCEOFWIND_BASE = "http://localhost:1337"
   FORCEOFWIND_DECK_API_BASE = "http://localhost:1337/api/deck/"
   FORCEOFWIND_URL_MATCH = "localhost:1337"
-  FORCEOFWIND_URL_ID_MATCH = "localhost:1337/view_decklist/(%d*)/"
+  FORCEOFWIND_URL_ID_MATCH = "view_decklist/(%d+)(/[%a%d]+)?/?$"
   FORCEOFWIND_BASE_IMG_URL = FORCEOFWIND_BASE
 else
   FORCEOFWIND_BASE = "https://forceofwind.online"
   FORCEOFWIND_DECK_API_BASE = "https://forceofwind.online/api/deck/"
   FORCEOFWIND_URL_MATCH = "forceofwind%.online"
-  FORCEOFWIND_URL_ID_MATCH = "forceofwind%.online/view_decklist/(%d*)/"
+  FORCEOFWIND_URL_ID_MATCH = "view_decklist/(%d+)(/[%a%d]+)?/?$"
   FORCEOFWIND_BASE_IMG_URL = ""
 end
 
@@ -906,9 +906,11 @@ function dump(o)
  end
 
 local function parseDeckIDForceOfWind(s)
-    -- NOTE: need to do this in multiple parts because TTS uses an old version
-    -- of lua with hilariously sad pattern matching
-    return s:match(FORCEOFWIND_URL_ID_MATCH)
+    local id, hash = url:match(FORCEOFWIND_URL_ID_MATCH)
+    if id then
+        return hash and (id .. hash) or id
+    end
+    return nil  -- invalid format
 end
 
 local function queryDeckForceOfWind(slug, onSuccess, onError)
@@ -924,7 +926,7 @@ local function queryDeckForceOfWind(slug, onSuccess, onError)
     WebRequest.get(url, function(webReturn)
         if webReturn.error then
             if string.match(webReturn.error, "(404)") then
-                onError("Deck not found. Is it public?")
+                onError("Deck not found. Ensure the deck is public or that the provied sharecode valid!")
             else
                 onError("Web request error: " .. webReturn.error)
             end
